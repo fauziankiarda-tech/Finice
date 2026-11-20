@@ -1,4 +1,3 @@
-
 // FINICE - SMART FINANCE
 
 const $ = id => document.getElementById(id);
@@ -94,6 +93,8 @@ async function logout() {
     location.href = "login.html";
 }
 
+$("logoutButton").addEventListener("click", logout);
+
 // ==============================
 // DATA SUPABASE
 // ==============================
@@ -146,13 +147,13 @@ function getTotals() {
 // ==============================
 
 function navigateTo(page) {
-    document.querySelectorAll(".app-page").forEach(section => {
-        section.classList.remove("active");
-    });
-
     const target = $(page + "Page");
 
     if (!target) return;
+
+    document.querySelectorAll(".app-page").forEach(section => {
+        section.classList.remove("active");
+    });
 
     target.classList.add("active");
 
@@ -462,16 +463,9 @@ $("transactionForm").addEventListener("submit", async event => {
 
         if (idValue) {
             // EDIT TRANSAKSI
-
             const result = await db
                 .from("transactions")
-                .update({
-                    type,
-                    amount,
-                    category,
-                    description,
-                    date
-                })
+                .update({ type, amount, category, description, date })
                 .eq("id", idValue)
                 .eq("user_id", currentUser.id);
 
@@ -479,7 +473,6 @@ $("transactionForm").addEventListener("submit", async event => {
 
         } else {
             // TAMBAH TRANSAKSI
-
             const result = await db
                 .from("transactions")
                 .insert([payload]);
@@ -603,14 +596,12 @@ function createTransactionRow(item, showActions = false) {
         const edit = document.createElement("button");
         edit.textContent = "Edit";
         edit.type = "button";
-
         edit.addEventListener("click", () => openModal(item.id));
 
         const remove = document.createElement("button");
         remove.textContent = "Hapus";
         remove.type = "button";
         remove.className = "delete-btn";
-
         remove.addEventListener("click", () => deleteTransaction(item.id));
 
         actions.append(edit, remove);
@@ -727,6 +718,12 @@ function chartTextColor() {
         : "#555555";
 }
 
+function chartGridColor() {
+    return document.body.classList.contains("dark-mode")
+        ? "rgba(255,255,255,.08)"
+        : "rgba(0,0,0,.06)";
+}
+
 function updateFinanceChart() {
     const canvas = $("financeChart");
 
@@ -767,6 +764,8 @@ function updateFinanceChart() {
 
     if (financeChart) financeChart.destroy();
 
+    const dark = document.body.classList.contains("dark-mode");
+
     financeChart = new Chart(canvas, {
         type: "line",
         data: {
@@ -775,16 +774,16 @@ function updateFinanceChart() {
                 {
                     label: "Pemasukan",
                     data: incomeData,
-                    borderColor: "#777777",
-                    backgroundColor: "rgba(120,120,120,.12)",
+                    borderColor: "#168653",
+                    backgroundColor: "rgba(22,134,83,.12)",
                     tension: .4,
                     fill: true
                 },
                 {
                     label: "Pengeluaran",
                     data: expenseData,
-                    borderColor: "#222222",
-                    backgroundColor: "rgba(30,30,30,.08)",
+                    borderColor: dark ? "#ff6868" : "#dc4545",
+                    backgroundColor: "rgba(220,69,69,.10)",
                     tension: .4,
                     fill: true
                 }
@@ -810,136 +809,155 @@ function updateFinanceChart() {
                     beginAtZero: true,
                     ticks: {
                         color: chartTextColor(),
-                        callback: value => "Rp " + Number(value).toLocaleString("id-ID")
+                        callback: value => rupiah(value)
                     },
-                    grid: { color: "rgba(130,130,130,.12)" }
+                    grid: { color: chartGridColor() }
                 }
             }
         }
     });
 }
 
-function updateStatisticsChart() {
-    const canvas = $("statisticsChart");
-
-    if (!canvas || typeof Chart === "undefined") return;
+function updateStatisticsCharts() {
+    if (typeof Chart === "undefined") return;
 
     const totals = getTotals();
+    const dark = document.body.classList.contains("dark-mode");
 
-    if (statisticsChart) statisticsChart.destroy();
+    // Pemasukan vs Pengeluaran
+    const barCanvas = $("statisticsChart");
 
-    statisticsChart = new Chart(canvas, {
-        type: "bar",
-        data: {
-            labels: ["Pemasukan", "Pengeluaran"],
-            datasets: [{
-                data: [totals.income, totals.expense],
-                backgroundColor: ["#999999", "#222222"],
-                borderRadius: 9,
-                maxBarThickness: 65
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: {
-                    ticks: { color: chartTextColor() },
-                    grid: { display: false }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: chartTextColor(),
-                        callback: value => "Rp " + Number(value).toLocaleString("id-ID")
+    if (barCanvas) {
+        if (statisticsChart) statisticsChart.destroy();
+
+        statisticsChart = new Chart(barCanvas, {
+            type: "bar",
+            data: {
+                labels: ["Pemasukan", "Pengeluaran"],
+                datasets: [{
+                    data: [totals.income, totals.expense],
+                    backgroundColor: [
+                        "#168653",
+                        dark ? "#ff6868" : "#dc4545"
+                    ],
+                    borderRadius: 10,
+                    maxBarThickness: 70
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: { color: chartTextColor() },
+                        grid: { display: false }
                     },
-                    grid: { color: "rgba(130,130,130,.12)" }
-                }
-            }
-        }
-    });
-}
-
-function updateCategoryChart() {
-    const canvas = $("categoryChart");
-
-    if (!canvas || typeof Chart === "undefined") return;
-
-    const expenses = transactions.filter(item => item.type === "expense");
-    const grouped = {};
-
-    expenses.forEach(item => {
-        grouped[item.category] = (grouped[item.category] || 0) + item.amount;
-    });
-
-    const labels = Object.keys(grouped);
-    const values = Object.values(grouped);
-
-    if (categoryChart) {
-        categoryChart.destroy();
-        categoryChart = null;
-    }
-
-    const breakdown = $("categoryBreakdown");
-    breakdown.replaceChildren();
-
-    if (labels.length === 0) {
-        breakdown.textContent = "Belum ada data pengeluaran.";
-        return;
-    }
-
-    categoryChart = new Chart(canvas, {
-        type: "doughnut",
-        data: {
-            labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    "#222222", "#555555", "#888888", "#aaaaaa",
-                    "#cccccc", "#444444", "#777777", "#dddddd"
-                ],
-                borderWidth: 2,
-                borderColor: document.body.classList.contains("dark-mode")
-                    ? "#1b1b1b"
-                    : "#ffffff"
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: "bottom",
-                    labels: {
-                        color: chartTextColor(),
-                        usePointStyle: true,
-                        padding: 15
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: chartTextColor(),
+                            callback: value => rupiah(value)
+                        },
+                        grid: { color: chartGridColor() }
                     }
                 }
             }
+        });
+    }
+
+    // Kategori pengeluaran
+    const donutCanvas = $("categoryChart");
+    const byCategory = {};
+
+    transactions
+        .filter(item => item.type === "expense")
+        .forEach(item => {
+            byCategory[item.category] =
+                (byCategory[item.category] || 0) + item.amount;
+        });
+
+    const entries = Object.entries(byCategory)
+        .sort((a, b) => b[1] - a[1]);
+
+    const colors = [
+        "#111111", "#444444", "#6b6b6b", "#8f8f8f",
+        "#b0b0b0", "#cfcfcf", "#168653", "#dc4545"
+    ];
+
+    const donutColors = dark
+        ? ["#ffffff", "#d0d0d0", "#a5a5a5", "#7d7d7d",
+           "#5c5c5c", "#444444", "#42c98b", "#ff6868"]
+        : colors;
+
+    if (donutCanvas) {
+        if (categoryChart) categoryChart.destroy();
+
+        if (entries.length > 0) {
+            categoryChart = new Chart(donutCanvas, {
+                type: "doughnut",
+                data: {
+                    labels: entries.map(entry => entry[0]),
+                    datasets: [{
+                        data: entries.map(entry => entry[1]),
+                        backgroundColor: entries.map(
+                            (_, index) => donutColors[index % donutColors.length]
+                        ),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "65%",
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } else {
+            categoryChart = null;
         }
-    });
+    }
 
-    labels.forEach((name, index) => {
+    // Rincian kategori
+    const breakdown = $("categoryBreakdown");
+    breakdown.replaceChildren();
+
+    if (entries.length === 0) {
+        showEmpty(breakdown, "Belum ada pengeluaran.");
+        return;
+    }
+
+    entries.forEach(([name, total], index) => {
         const row = document.createElement("div");
-        row.className = "category-row";
+        row.className = "category-item";
 
-        const title = document.createElement("span");
-        title.textContent = name;
+        const left = document.createElement("span");
+        left.className = "category-name";
 
-        const amount = document.createElement("strong");
-        amount.textContent = rupiah(values[index]);
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.background = donutColors[index % donutColors.length];
 
-        row.append(title, amount);
+        const label = document.createElement("span");
+        label.textContent = " " + name;
+
+        left.append(dot, label);
+
+        const percent = totals.expense > 0
+            ? Math.round((total / totals.expense) * 100)
+            : 0;
+
+        const right = document.createElement("strong");
+        right.textContent = `${rupiah(total)} (${percent}%)`;
+
+        row.append(left, right);
         breakdown.appendChild(row);
     });
 }
 
 function updateCharts() {
-    if (financeChart) updateFinanceChart();
-    if (statisticsChart) updateStatisticsChart();
-    if (categoryChart) updateCategoryChart();
+    updateFinanceChart();
+    updateStatisticsCharts();
 }
 
 // ==============================
@@ -953,108 +971,94 @@ function updateStatistics() {
     $("statIncome").textContent = rupiah(totals.income);
     $("statExpense").textContent = rupiah(totals.expense);
 
-    updateStatisticsChart();
-    updateCategoryChart();
-
     const insight = $("financialInsight");
 
     if (transactions.length === 0) {
-        insight.textContent =
-            "Belum ada data transaksi. Tambahkan transaksi untuk melihat ringkasan keuangan.";
-        return;
-    }
-
-    let message = "";
-
-    if (totals.income > totals.expense) {
-        message = "Pemasukanmu lebih besar daripada pengeluaran. Pertahankan pengelolaan keuangan yang baik.";
-    } else if (totals.income < totals.expense) {
-        message = "Pengeluaranmu lebih besar daripada pemasukan. Periksa kembali pengeluaran agar keuangan lebih teratur.";
+        insight.textContent = "Belum ada data transaksi.";
     } else {
-        message = "Jumlah pemasukan dan pengeluaranmu saat ini seimbang.";
+        const rate = totals.income > 0
+            ? Math.round((totals.expense / totals.income) * 100)
+            : null;
+
+        const parts = [
+            `Kamu punya ${transactions.length} transaksi tercatat.`
+        ];
+
+        if (rate !== null) {
+            parts.push(
+                `Pengeluaran sebesar ${rate}% dari total pemasukan.`
+            );
+        }
+
+        parts.push(
+            totals.balance >= 0
+                ? "Saldo bersihmu positif, pertahankan."
+                : "Pengeluaranmu melebihi pemasukan, coba kurangi."
+        );
+
+        insight.textContent = parts.join(" ");
     }
 
-    insight.textContent =
-        message +
-        ` Total pemasukan ${rupiah(totals.income)} dan total pengeluaran ${rupiah(totals.expense)}.`;
+    updateStatisticsCharts();
 }
 
 // ==============================
 // EKSPOR DATA
 // ==============================
 
-function exportData() {
+$("exportData").addEventListener("click", () => {
     if (transactions.length === 0) {
         showError("Belum ada transaksi untuk diekspor.");
         return;
     }
 
-    const data = {
-        aplikasi: "FINICE Smart Finance",
-        tanggalEkspor: new Date().toISOString(),
-        transaksi: transactions
-    };
-
-    const file = new Blob(
-        [JSON.stringify(data, null, 2)],
+    const blob = new Blob(
+        [JSON.stringify(transactions, null, 2)],
         { type: "application/json" }
     );
 
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "finice-transaksi.json";
+    link.download = "finice-transaksi-" + localDate() + ".json";
+
+    document.body.appendChild(link);
     link.click();
+    link.remove();
 
     URL.revokeObjectURL(url);
-}
-
-$("exportData").addEventListener("click", exportData);
-$("logoutButton").addEventListener("click", logout);
+});
 
 // ==============================
-// PERBARUI TAMPILAN
+// REFRESH & MULAI
 // ==============================
 
 function refreshAll() {
     updateDashboard();
     renderActivity();
     updateStatistics();
-    loadProfile();
 }
 
-// ==============================
-// MULAI APLIKASI
-// ==============================
+async function init() {
+    applyTheme();
 
-async function initApp() {
-    try {
-        if (typeof db === "undefined") {
-            showError("Koneksi Supabase tidak ditemukan. Periksa config.js.");
-            return;
-        }
-
-        applyTheme();
-
-        const loggedIn = await checkLogin();
-
-        if (!loggedIn) return;
-
-        await loadTransactions();
-
-        refreshAll();
-
-        console.log("FINICE berhasil dijalankan.");
-
-    } catch (error) {
-        console.error("FINICE error:", error);
-
+    if (typeof db === "undefined") {
         showError(
-            "Terjadi kesalahan saat menjalankan FINICE: " +
-            (error.message || "Kesalahan tidak diketahui")
+            "Koneksi Supabase tidak ditemukan. " +
+            "Pastikan config.js ada dan membuat variabel 'db'."
         );
+        return;
     }
+
+    const loggedIn = await checkLogin();
+
+    if (!loggedIn) return;
+
+    await loadTransactions();
+
+    loadProfile();
+    refreshAll();
 }
 
-initApp();
+init();
