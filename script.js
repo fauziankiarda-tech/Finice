@@ -383,10 +383,12 @@ function openModal(id = null) {
     }
 
     $("transactionModal").classList.add("show");
+    $("transactionModal").style.display = "flex";
 }
 
 function closeModal() {
     $("transactionModal").classList.remove("show");
+    $("transactionModal").style.display = "none";
 }
 
 $("addTransaction").addEventListener("click", () => openModal());
