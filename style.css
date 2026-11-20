@@ -1,29 +1,57 @@
+/* ==========================================================
+   FINICE - Smart Finance  |  Tema: Indigo Modern
+   ========================================================== */
+
 :root {
-    --bg: #f5f5f5;
+    --bg: #f4f5fb;
     --surface: #ffffff;
-    --surface-2: #eeeeee;
-    --text: #111111;
-    --muted: #777777;
-    --border: #e8e8e8;
-    --primary: #111111;
+    --surface-2: #eef0f9;
+    --text: #14162b;
+    --muted: #6b7090;
+    --border: #e3e6f2;
+
+    --accent: #5b5bf0;
+    --accent-2: #8b5cf6;
+    --accent-soft: rgba(91, 91, 240, 0.1);
+    --grad: linear-gradient(135deg, #5b5bf0 0%, #8b5cf6 100%);
+
+    --primary: #5b5bf0;
     --primary-text: #ffffff;
-    --success: #168653;
-    --danger: #dc4545;
-    --shadow: 0 5px 25px rgba(0, 0, 0, 0.045);
+
+    --success: #12a36a;
+    --success-soft: rgba(18, 163, 106, 0.12);
+    --danger: #e5484d;
+    --danger-soft: rgba(229, 72, 77, 0.11);
+
+    --shadow: 0 6px 24px rgba(60, 60, 140, 0.07);
+    --shadow-hover: 0 12px 32px rgba(60, 60, 140, 0.13);
+
+    --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
 }
 
 body.dark {
-    --bg: #101010;
-    --surface: #1b1b1b;
-    --surface-2: #292929;
-    --text: #f5f5f5;
-    --muted: #999999;
-    --border: #303030;
-    --primary: #ffffff;
-    --primary-text: #111111;
-    --success: #42c98b;
-    --danger: #ff6868;
-    --shadow: 0 5px 25px rgba(0, 0, 0, 0.18);
+    --bg: #0d0e1a;
+    --surface: #171829;
+    --surface-2: #212339;
+    --text: #f1f2fb;
+    --muted: #9a9dbd;
+    --border: #2a2c45;
+
+    --accent: #7c7cff;
+    --accent-2: #a78bfa;
+    --accent-soft: rgba(124, 124, 255, 0.15);
+    --grad: linear-gradient(135deg, #6a6af5 0%, #9b6cf7 100%);
+
+    --primary: #7c7cff;
+    --primary-text: #ffffff;
+
+    --success: #3dd68c;
+    --success-soft: rgba(61, 214, 140, 0.14);
+    --danger: #ff6b70;
+    --danger-soft: rgba(255, 107, 112, 0.14);
+
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -41,7 +69,25 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+
+/* Cahaya lembut di latar belakang */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(520px 320px at 85% -5%, rgba(139, 92, 246, 0.16), transparent 70%),
+        radial-gradient(460px 300px at -5% 8%, rgba(91, 91, 240, 0.13), transparent 70%);
+}
+
+::selection {
+    background: var(--accent);
+    color: #ffffff;
 }
 
 button,
@@ -58,7 +104,7 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-    outline: 2px solid var(--muted);
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -66,16 +112,18 @@ select:focus-visible {
     width: 100%;
     max-width: 1150px;
     margin: 0 auto;
-    padding: 25px 28px 145px;
+    padding: 25px 28px 150px;
 }
 
-/* HEADER */
+/* ==========================================================
+   HEADER
+   ========================================================== */
 
 .topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 38px;
+    margin-bottom: 34px;
 }
 
 .brand {
@@ -87,14 +135,15 @@ select:focus-visible {
 .brand-icon {
     width: 48px;
     height: 48px;
-    background: var(--primary);
-    color: var(--primary-text);
+    background: var(--grad);
+    color: #ffffff;
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 23px;
     font-weight: 800;
+    box-shadow: 0 8px 20px rgba(91, 91, 240, 0.35);
 }
 
 .brand h2 {
@@ -104,7 +153,7 @@ select:focus-visible {
 }
 
 .brand h2 span {
-    color: var(--muted);
+    color: var(--accent);
 }
 
 .brand small {
@@ -130,6 +179,7 @@ select:focus-visible {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 
 .icon-button {
@@ -137,37 +187,50 @@ select:focus-visible {
     border: 1px solid var(--border);
     color: var(--text);
     font-size: 21px;
-    transition: 0.25s;
+    box-shadow: var(--shadow);
 }
 
-.icon-button:hover {
-    background: var(--surface-2);
-    transform: rotate(-12deg);
+.icon-button:active,
+.profile-button:active {
+    transform: scale(0.92);
 }
 
 .profile-button {
-    background: var(--primary);
-    color: var(--primary-text);
+    background: var(--grad);
+    color: #ffffff;
     border: none;
     font-weight: 800;
     font-size: 17px;
+    box-shadow: 0 6px 16px rgba(91, 91, 240, 0.35);
 }
 
-/* PAGE */
+@media (hover: hover) {
+    .icon-button:hover {
+        transform: rotate(-12deg) scale(1.05);
+    }
+
+    .profile-button:hover {
+        transform: scale(1.06);
+    }
+}
+
+/* ==========================================================
+   HALAMAN
+   ========================================================== */
 
 .app-page {
     display: none;
-    animation: pageEnter 0.35s ease;
 }
 
 .app-page.active {
     display: block;
+    animation: pageEnter 0.45s var(--ease);
 }
 
 @keyframes pageEnter {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(14px);
     }
 
     to {
@@ -184,7 +247,7 @@ select:focus-visible {
 .eyebrow {
     font-size: 10px;
     font-weight: 800;
-    color: var(--muted);
+    color: var(--accent);
     letter-spacing: 1.8px;
     margin-bottom: 9px;
 }
@@ -200,7 +263,7 @@ select:focus-visible {
 
 .welcome h1 span,
 .page-header h1 span {
-    color: var(--muted);
+    color: var(--accent);
 }
 
 .subtitle {
@@ -210,33 +273,44 @@ select:focus-visible {
 }
 
 .date-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 12px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-top: 14px;
 }
 
-/* BALANCE CARD */
+.date-label:empty {
+    display: none;
+}
+
+/* ==========================================================
+   KARTU SALDO
+   ========================================================== */
 
 .balance-card {
     position: relative;
     overflow: hidden;
-    background: #111111;
+    background: linear-gradient(135deg, #4338ca 0%, #5b5bf0 45%, #8b5cf6 100%);
     color: #ffffff;
-    border-radius: 25px;
+    border-radius: 26px;
     padding: 28px;
     margin-bottom: 20px;
     min-height: 225px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 36px rgba(91, 91, 240, 0.35);
 }
 
 .balance-card::before {
     content: "";
     position: absolute;
-    width: 210px;
-    height: 210px;
-    border: 1px solid rgba(255, 255, 255, 0.13);
+    width: 230px;
+    height: 230px;
     border-radius: 50%;
-    right: -65px;
+    background: rgba(255, 255, 255, 0.1);
+    right: -70px;
     top: -110px;
     pointer-events: none;
 }
@@ -244,12 +318,12 @@ select:focus-visible {
 .balance-card::after {
     content: "";
     position: absolute;
-    width: 150px;
-    height: 150px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    width: 170px;
+    height: 170px;
     border-radius: 50%;
-    right: -30px;
-    top: -80px;
+    background: rgba(255, 255, 255, 0.07);
+    left: -60px;
+    bottom: -90px;
     pointer-events: none;
 }
 
@@ -270,14 +344,15 @@ select:focus-visible {
 
 .balance-caption {
     font-size: 10px;
-    color: #a8a8a8;
+    color: rgba(255, 255, 255, 0.72);
 }
 
 .wallet-icon {
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    border: 1px solid #454545;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -285,7 +360,7 @@ select:focus-visible {
 }
 
 .balance-card h2 {
-    font-size: clamp(26px, 5vw, 35px);
+    font-size: clamp(27px, 5.5vw, 36px);
     letter-spacing: -1px;
     font-weight: 800;
     margin: 26px 0;
@@ -296,11 +371,11 @@ select:focus-visible {
 
 .balance-bottom {
     font-size: 10px;
-    color: #bdbdbd;
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .balance-bottom strong {
-    color: white;
+    color: #ffffff;
     font-size: 13px;
     margin-left: 5px;
 }
@@ -308,10 +383,12 @@ select:focus-visible {
 .card-symbol {
     font-size: 17px;
     letter-spacing: -5px;
-    color: white;
+    color: #ffffff;
 }
 
-/* SUMMARY */
+/* ==========================================================
+   RINGKASAN
+   ========================================================== */
 
 .summary-grid {
     display: grid;
@@ -323,10 +400,11 @@ select:focus-visible {
 .summary-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 19px;
+    border-radius: 20px;
     padding: 19px;
     box-shadow: var(--shadow);
     min-width: 0;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 
 .summary-heading {
@@ -340,19 +418,20 @@ select:focus-visible {
 }
 
 .summary-icon {
-    width: 29px;
-    height: 29px;
+    width: 30px;
+    height: 30px;
     border-radius: 10px;
-    background: rgba(22, 134, 83, 0.1);
+    background: var(--success-soft);
     color: var(--success);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 17px;
+    font-weight: 700;
 }
 
 .expense-icon {
-    background: rgba(220, 69, 69, 0.1);
+    background: var(--danger-soft);
     color: var(--danger);
 }
 
@@ -368,12 +447,14 @@ select:focus-visible {
     color: var(--muted);
 }
 
-/* SECTION CARD */
+/* ==========================================================
+   KARTU SECTION
+   ========================================================== */
 
 .section-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 21px;
+    border-radius: 22px;
     padding: 23px;
     margin-bottom: 20px;
     box-shadow: var(--shadow);
@@ -397,14 +478,29 @@ select:focus-visible {
 
 .period-label {
     font-size: 11px;
-    color: var(--muted);
-    background: var(--surface-2);
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
     padding: 8px 12px;
     border-radius: 20px;
     white-space: nowrap;
 }
 
-/* CHART */
+@media (hover: hover) {
+    .summary-card:hover,
+    .section-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .section-card {
+        transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    }
+}
+
+/* ==========================================================
+   GRAFIK
+   ========================================================== */
 
 .chart-container {
     width: 100%;
@@ -424,7 +520,9 @@ select:focus-visible {
     position: relative;
 }
 
-/* TRANSACTIONS */
+/* ==========================================================
+   TRANSAKSI
+   ========================================================== */
 
 .transaction-list {
     display: flex;
@@ -437,19 +535,34 @@ select:focus-visible {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    padding: 15px 0;
+    padding: 14px 8px;
+    margin: 0 -8px;
+    border-radius: 14px;
     border-bottom: 1px solid var(--border);
+    transition: background 0.25s var(--ease);
+    animation: itemIn 0.4s var(--ease) both;
 }
 
 .transaction-item:last-child {
     border-bottom: none;
 }
 
-.transaction-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
+@keyframes itemIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (hover: hover) {
+    .transaction-item:hover {
+        background: var(--surface-2);
+    }
 }
 
 .transaction-icon {
@@ -457,14 +570,25 @@ select:focus-visible {
     height: 43px;
     flex-shrink: 0;
     background: var(--surface-2);
+    color: var(--muted);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 17px;
+    font-weight: 700;
 }
 
-/* DIPERBAIKI: ikon dan teks transaksi sejajar */
+.transaction-item:has(.income-text) .transaction-icon {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.transaction-item:has(.expense-text) .transaction-icon {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
 .transaction-info {
     display: flex;
     align-items: center;
@@ -489,23 +613,10 @@ select:focus-visible {
     text-align: right;
 }
 
-.transaction-right strong {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 5px;
-    overflow-wrap: anywhere;
-}
-
-.transaction-right small {
-    font-size: 10px;
-    color: var(--muted);
-}
-
-/* DIPERBAIKI: kelas yang dipakai JS */
 .transaction-amount {
     display: block;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 5px;
     overflow-wrap: anywhere;
 }
@@ -528,50 +639,128 @@ select:focus-visible {
 }
 
 .transaction-actions button {
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 5px 10px;
+    border: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 9px;
+    padding: 6px 11px;
     font-size: 10px;
     font-weight: 700;
+    transition: transform 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+
+.transaction-actions button:active {
+    transform: scale(0.93);
 }
 
 .transaction-actions .delete-btn {
     color: var(--danger);
-    background: rgba(220, 69, 69, 0.09);
-    border-color: rgba(220, 69, 69, 0.2);
+    background: var(--danger-soft);
 }
 
 .empty-state {
-    padding: 35px 10px;
+    padding: 38px 10px;
     text-align: center;
     font-size: 12px;
     color: var(--muted);
+    line-height: 1.7;
 }
 
-/* TEXT BUTTON */
+/* ==========================================================
+   TOMBOL
+   ========================================================== */
 
 .text-button {
     border: none;
     background: transparent;
-    color: var(--text);
+    color: var(--accent);
     font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
-.text-button:hover {
+.text-button:active {
+    transform: scale(0.95);
+    opacity: 0.7;
+}
+
+.primary-button {
+    border: none;
+    border-radius: 14px;
+    background: var(--grad);
+    color: #ffffff;
+    padding: 15px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(91, 91, 240, 0.3);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+
+.primary-button:active {
+    transform: scale(0.97);
+    box-shadow: 0 4px 12px rgba(91, 91, 240, 0.3);
+}
+
+.primary-button:disabled {
     opacity: 0.6;
+    cursor: wait;
 }
 
-/* QUICK ACTION */
+@media (hover: hover) {
+    .primary-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(91, 91, 240, 0.4);
+    }
+}
+
+.secondary-button {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background 0.25s var(--ease), transform 0.2s var(--ease);
+}
+
+.secondary-button:active {
+    transform: scale(0.98);
+    background: var(--surface-2);
+}
+
+.danger-button {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: 1px solid transparent;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 0.2s var(--ease);
+}
+
+.danger-button:active {
+    transform: scale(0.98);
+}
+
+.full-button {
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* ==========================================================
+   AKSI CEPAT
+   ========================================================== */
 
 .quick-action {
-    background: var(--surface-2);
+    position: relative;
+    overflow: hidden;
+    background: var(--accent-soft);
     border: 1px solid var(--border);
     padding: 25px;
-    border-radius: 21px;
+    border-radius: 22px;
     margin-bottom: 20px;
 }
 
@@ -588,59 +777,9 @@ select:focus-visible {
     margin-bottom: 18px;
 }
 
-/* BUTTONS */
-
-.primary-button {
-    border: none;
-    border-radius: 13px;
-    background: var(--primary);
-    color: var(--primary-text);
-    padding: 14px 18px;
-    font-size: 12px;
-    font-weight: 700;
-    transition: 0.25s ease;
-}
-
-.primary-button:hover {
-    opacity: 0.85;
-    transform: translateY(-2px);
-}
-
-.primary-button:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-.secondary-button {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 14px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.secondary-button:hover {
-    background: var(--surface-2);
-}
-
-.danger-button {
-    background: rgba(220, 69, 69, 0.09);
-    color: var(--danger);
-    border: 1px solid rgba(220, 69, 69, 0.2);
-    border-radius: 13px;
-    padding: 14px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.full-button {
-    width: 100%;
-    margin-top: 12px;
-}
-
-/* ACTIVITY */
+/* ==========================================================
+   AKTIVITAS
+   ========================================================== */
 
 .activity-summary {
     display: grid;
@@ -652,14 +791,26 @@ select:focus-visible {
 .activity-summary > div {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 17px;
+    border-radius: 18px;
     padding: 17px;
     min-width: 0;
+    box-shadow: var(--shadow);
+}
+
+.activity-summary > div:last-child {
+    background: var(--grad);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+.activity-summary > div:last-child span {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .activity-summary span {
     color: var(--muted);
     font-size: 10px;
+    font-weight: 600;
 }
 
 .activity-summary h2 {
@@ -673,15 +824,21 @@ select:focus-visible {
 }
 
 .search-box {
-    height: 47px;
+    height: 48px;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 0 14px;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     margin-bottom: 17px;
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 .search-box span {
@@ -696,7 +853,7 @@ select:focus-visible {
     outline: none;
     background: transparent;
     color: var(--text);
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .filter-tabs {
@@ -704,24 +861,34 @@ select:focus-visible {
     gap: 8px;
     overflow-x: auto;
     padding-bottom: 17px;
+    scrollbar-width: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .filter-btn {
     flex-shrink: 0;
     border: 1px solid var(--border);
     border-radius: 25px;
-    padding: 9px 15px;
+    padding: 9px 16px;
     background: var(--surface);
     color: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    transition: 0.2s;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.25s var(--ease);
+}
+
+.filter-btn:active {
+    transform: scale(0.95);
 }
 
 .filter-btn.active {
-    background: var(--primary);
-    color: var(--primary-text);
-    border-color: var(--primary);
+    background: var(--grad);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 6px 14px rgba(91, 91, 240, 0.3);
 }
 
 .activity-heading {
@@ -739,11 +906,13 @@ select:focus-visible {
     color: var(--muted);
 }
 
-/* STATISTICS */
+/* ==========================================================
+   STATISTIK
+   ========================================================== */
 
 .stat-total {
-    background: var(--surface-2);
-    border-radius: 15px;
+    background: var(--accent-soft);
+    border-radius: 16px;
     padding: 17px;
     margin-bottom: 15px;
 }
@@ -751,10 +920,11 @@ select:focus-visible {
 .stat-total span {
     color: var(--muted);
     font-size: 11px;
+    font-weight: 600;
 }
 
 .stat-total h2 {
-    font-size: 25px;
+    font-size: 26px;
     margin-top: 8px;
     overflow-wrap: anywhere;
 }
@@ -788,6 +958,7 @@ select:focus-visible {
     height: 9px;
     display: inline-block;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .income-dot {
@@ -801,7 +972,7 @@ select:focus-visible {
 .category-breakdown {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 6px;
     margin-top: 20px;
 }
 
@@ -811,6 +982,9 @@ select:focus-visible {
     justify-content: space-between;
     gap: 12px;
     font-size: 11px;
+    padding: 11px 12px;
+    background: var(--surface-2);
+    border-radius: 12px;
 }
 
 .category-name {
@@ -818,44 +992,46 @@ select:focus-visible {
     align-items: center;
     gap: 6px;
     min-width: 0;
+    font-weight: 600;
 }
-
-/* INSIGHT */
 
 .insight-box {
     margin-top: 15px;
-    background: var(--surface-2);
+    background: var(--accent-soft);
     border-radius: 14px;
     padding: 17px;
-    color: var(--muted);
+    color: var(--text);
     font-size: 12px;
     line-height: 1.8;
 }
 
-/* PROFILE */
+/* ==========================================================
+   PROFIL
+   ========================================================== */
 
 .profile-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 28px 20px;
+    border-radius: 24px;
+    padding: 30px 20px;
     margin-bottom: 20px;
     text-align: center;
     box-shadow: var(--shadow);
 }
 
 .profile-avatar {
-    width: 78px;
-    height: 78px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: var(--primary);
-    color: var(--primary-text);
+    background: var(--grad);
+    color: #ffffff;
     margin: 0 auto 15px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 800;
+    box-shadow: 0 10px 24px rgba(91, 91, 240, 0.38);
 }
 
 .profile-card h2 {
@@ -871,11 +1047,12 @@ select:focus-visible {
 
 .profile-tag {
     display: inline-block;
-    background: var(--surface-2);
+    background: var(--accent-soft);
+    color: var(--accent);
     border-radius: 20px;
-    padding: 7px 12px;
+    padding: 7px 13px;
     font-size: 9px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 1px;
 }
 
@@ -896,10 +1073,17 @@ select:focus-visible {
     width: 100%;
     padding: 14px;
     border: 1px solid var(--border);
-    border-radius: 11px;
+    border-radius: 12px;
     background: var(--bg);
     color: var(--text);
     font-size: 12px;
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.profile-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 .profile-form input:read-only {
@@ -937,24 +1121,33 @@ select:focus-visible {
 .theme-switch {
     border: none;
     border-radius: 20px;
-    background: var(--primary);
-    color: var(--primary-text);
-    padding: 8px 13px;
+    background: var(--grad);
+    color: #ffffff;
+    padding: 9px 15px;
     font-size: 9px;
     font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 14px rgba(91, 91, 240, 0.3);
+    transition: transform 0.2s var(--ease);
+}
+
+.theme-switch:active {
+    transform: scale(0.93);
 }
 
 .data-warning {
     background: var(--surface-2);
     color: var(--muted);
     padding: 15px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 11px;
     line-height: 1.7;
     margin: 15px 0;
 }
 
-/* TRANSACTION MODAL */
+/* ==========================================================
+   MODAL TRANSAKSI
+   ========================================================== */
 
 .modal-overlay {
     position: fixed;
@@ -964,15 +1157,15 @@ select:focus-visible {
     align-items: center;
     justify-content: center;
     padding: 16px;
-    background: rgba(0, 0, 0, 0.62);
-    backdrop-filter: blur(6px);
+    background: rgba(13, 14, 26, 0.55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 
-/* DIPERBAIKI: JS memakai class "show", bukan hanya "active" */
 .modal-overlay.active,
 .modal-overlay.show {
     display: flex;
-    animation: fadeIn 0.2s ease;
+    animation: fadeIn 0.25s var(--ease);
 }
 
 .modal {
@@ -982,9 +1175,10 @@ select:focus-visible {
     overflow-y: auto;
     background: var(--surface);
     color: var(--text);
-    border-radius: 23px;
-    padding: 24px;
-    animation: modalUp 0.3s ease;
+    border-radius: 26px;
+    padding: 26px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    animation: modalUp 0.4s var(--ease);
 }
 
 @keyframes fadeIn {
@@ -995,12 +1189,12 @@ select:focus-visible {
 @keyframes modalUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(40px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -1008,7 +1202,7 @@ select:focus-visible {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 23px;
+    margin-bottom: 22px;
 }
 
 .modal-heading h2 {
@@ -1016,13 +1210,18 @@ select:focus-visible {
 }
 
 .close-button {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border: none;
     border-radius: 50%;
     background: var(--surface-2);
     color: var(--text);
     font-size: 23px;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.close-button:active {
+    transform: scale(0.9) rotate(90deg);
 }
 
 .modal form {
@@ -1039,38 +1238,41 @@ select:focus-visible {
 .modal form input,
 .modal form select {
     width: 100%;
-    min-height: 46px;
-    padding: 12px;
+    min-height: 48px;
+    padding: 12px 14px;
     background: var(--bg);
     color: var(--text);
     border: 1px solid var(--border);
-    border-radius: 11px;
-    font-size: 12px;
+    border-radius: 13px;
+    font-size: 13px;
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 
 .modal form input:focus,
 .modal form select:focus {
     outline: none;
-    border-color: var(--muted);
-}
-
-.modal form input.hidden-field {
-    display: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 .modal form input#customCategory {
     margin-top: 10px;
 }
 
-.hidden-field {
+.hidden-field,
+.modal form input.hidden-field {
     display: none;
 }
 
 .submit-button {
-    margin-top: 22px;
+    margin-top: 24px;
+    padding: 16px 20px;
+    font-size: 13px;
 }
 
-/* LIQUID BOTTOM NAVIGATION */
+/* ==========================================================
+   NAVIGASI BAWAH
+   ========================================================== */
 
 .bottom-nav {
     position: fixed;
@@ -1084,10 +1286,12 @@ select:focus-visible {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: #111111;
+    background: rgba(22, 23, 44, 0.94);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 25px;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.24);
+    border-radius: 26px;
+    box-shadow: 0 16px 40px rgba(20, 20, 60, 0.32);
 }
 
 .nav-item {
@@ -1097,13 +1301,13 @@ select:focus-visible {
     flex-shrink: 0;
     border: none;
     background: transparent;
-    color: #929292;
+    color: #8b8eb0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    transition: color 0.25s ease;
+    transition: color 0.3s var(--ease);
 }
 
 .nav-icon {
@@ -1113,7 +1317,7 @@ select:focus-visible {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: all 0.4s var(--ease);
 }
 
 .nav-icon svg {
@@ -1130,6 +1334,7 @@ select:focus-visible {
     font-size: 10px;
     font-weight: 600;
     white-space: nowrap;
+    transition: transform 0.4s var(--ease);
 }
 
 .nav-item.active {
@@ -1141,11 +1346,11 @@ select:focus-visible {
     top: -29px;
     width: 62px;
     height: 62px;
-    background: #ffffff;
-    color: #111111;
+    background: var(--grad);
+    color: #ffffff;
     border: 6px solid var(--bg);
-    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
-    animation: liquidPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 8px 20px rgba(91, 91, 240, 0.45);
+    animation: liquidPop 0.5s var(--ease);
 }
 
 .nav-item.active .nav-icon svg {
@@ -1160,7 +1365,7 @@ select:focus-visible {
 
 @keyframes liquidPop {
     0% {
-        transform: scale(0.65);
+        transform: scale(0.6);
     }
 
     65% {
@@ -1172,19 +1377,19 @@ select:focus-visible {
     }
 }
 
-/* ADD NAV BUTTON */
+/* Tombol tambah di tengah navigasi */
 
 .nav-item.add-nav {
-    color: #111111;
+    color: #ffffff;
 }
 
 .nav-item.add-nav .nav-icon {
-    width: 48px;
-    height: 48px;
-    background: #ffffff;
-    color: #111111;
-    border-radius: 17px;
-    transition: 0.25s ease;
+    width: 50px;
+    height: 50px;
+    background: var(--grad);
+    color: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(91, 91, 240, 0.5);
 }
 
 .nav-item.add-nav .nav-icon svg {
@@ -1193,23 +1398,27 @@ select:focus-visible {
     stroke-width: 2.2;
 }
 
-.nav-item.add-nav:hover .nav-icon {
-    transform: rotate(90deg) scale(1.08);
-}
-
 .nav-item.add-nav:active .nav-icon {
     transform: scale(0.9);
 }
 
-/* RESPONSIVE TABLET */
+@media (hover: hover) {
+    .nav-item.add-nav:hover .nav-icon {
+        transform: rotate(90deg) scale(1.08);
+    }
+}
+
+/* ==========================================================
+   RESPONSIF
+   ========================================================== */
 
 @media (max-width: 760px) {
     .app-container {
-        padding: 22px 18px 145px;
+        padding: 22px 18px 150px;
     }
 
     .topbar {
-        margin-bottom: 30px;
+        margin-bottom: 28px;
     }
 
     .section-card {
@@ -1226,11 +1435,9 @@ select:focus-visible {
     }
 }
 
-/* RESPONSIVE PHONE */
-
 @media (max-width: 480px) {
     .app-container {
-        padding: 20px 16px 145px;
+        padding: 20px 16px 150px;
     }
 
     .brand-icon {
@@ -1260,7 +1467,39 @@ select:focus-visible {
         height: 230px;
     }
 
+    /* Modal tampil seperti bottom sheet di HP */
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
     .modal {
-        padding: 20px;
+        max-width: none;
+        max-height: 92vh;
+        border-radius: 28px 28px 0 0;
+        padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+        animation: sheetUp 0.45s var(--ease);
+    }
+}
+
+@keyframes sheetUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Hormati pengguna yang mematikan animasi */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }
