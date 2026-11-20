@@ -1,4 +1,3 @@
-
 :root {
     --bg: #f5f5f5;
     --surface: #ffffff;
@@ -239,6 +238,7 @@ select:focus-visible {
     border-radius: 50%;
     right: -65px;
     top: -110px;
+    pointer-events: none;
 }
 
 .balance-card::after {
@@ -250,6 +250,7 @@ select:focus-visible {
     border-radius: 50%;
     right: -30px;
     top: -80px;
+    pointer-events: none;
 }
 
 .balance-top,
@@ -463,7 +464,11 @@ select:focus-visible {
     font-size: 17px;
 }
 
+/* DIPERBAIKI: ikon dan teks transaksi sejajar */
 .transaction-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     min-width: 0;
 }
 
@@ -496,12 +501,46 @@ select:focus-visible {
     color: var(--muted);
 }
 
+/* DIPERBAIKI: kelas yang dipakai JS */
+.transaction-amount {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    overflow-wrap: anywhere;
+}
+
+.income-text,
 .amount-income {
     color: var(--success);
 }
 
+.expense-text,
 .amount-expense {
     color: var(--danger);
+}
+
+.transaction-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.transaction-actions button {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.transaction-actions .delete-btn {
+    color: var(--danger);
+    background: rgba(220, 69, 69, 0.09);
+    border-color: rgba(220, 69, 69, 0.2);
 }
 
 .empty-state {
@@ -565,6 +604,11 @@ select:focus-visible {
 .primary-button:hover {
     opacity: 0.85;
     transform: translateY(-2px);
+}
+
+.primary-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .secondary-button {
@@ -769,6 +813,13 @@ select:focus-visible {
     font-size: 11px;
 }
 
+.category-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
 /* INSIGHT */
 
 .insight-box {
@@ -917,7 +968,9 @@ select:focus-visible {
     backdrop-filter: blur(6px);
 }
 
-.modal-overlay.active {
+/* DIPERBAIKI: JS memakai class "show", bukan hanya "active" */
+.modal-overlay.active,
+.modal-overlay.show {
     display: flex;
     animation: fadeIn 0.2s ease;
 }
@@ -999,6 +1052,14 @@ select:focus-visible {
 .modal form select:focus {
     outline: none;
     border-color: var(--muted);
+}
+
+.modal form input.hidden-field {
+    display: none;
+}
+
+.modal form input#customCategory {
+    margin-top: 10px;
 }
 
 .hidden-field {
@@ -1151,10 +1212,6 @@ select:focus-visible {
         margin-bottom: 30px;
     }
 
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
     .section-card {
         padding: 20px;
     }
@@ -1191,143 +1248,19 @@ select:focus-visible {
         font-size: 29px;
     }
 
-    .balance-card {
-        min-height: 220px;
-        border-radius: 23px;
-        padding: 23px;
-    }
-
     .summary-grid {
-        gap: 11px;
+        gap: 12px;
     }
 
     .summary-card {
-        padding: 15px;
-    }
-
-    .summary-card h3 {
-        font-size: 16px;
-    }
-
-    .section-card {
-        padding: 18px;
-        border-radius: 19px;
-    }
-
-    .section-heading h2 {
-        font-size: 17px;
+        padding: 16px;
     }
 
     .chart-container {
         height: 230px;
     }
 
-    .donut-container {
-        height: 220px;
-    }
-
-    .bottom-nav {
-        height: 75px;
-        width: calc(100% - 30px);
-        bottom: calc(13px + env(safe-area-inset-bottom));
-        border-radius: 24px;
-    }
-
-    .nav-item.active .nav-icon {
-        top: -28px;
-    }
-
-    .nav-item small {
-        font-size: 9px;
-    }
-
-    .activity-summary h2 {
-        font-size: 17px;
-    }
-
     .modal {
         padding: 20px;
-        border-radius: 21px;
-    }
-}
-
-/* SMALL PHONE */
-
-@media (max-width: 360px) {
-    .app-container {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .summary-card {
-        padding: 12px;
-    }
-
-    .summary-heading {
-        font-size: 10px;
-    }
-
-    .summary-card h3 {
-        font-size: 14px;
-    }
-
-    .nav-item small {
-        font-size: 8px;
-    }
-
-    .balance-card h2 {
-        font-size: 25px;
-    }
-}
-
-/* DESKTOP */
-
-@media (min-width: 761px) {
-    .app-container {
-        padding-bottom: 150px;
-    }
-
-    .welcome {
-        margin-bottom: 30px;
-    }
-
-    .summary-grid {
-        gap: 18px;
-    }
-
-    .section-card {
-        padding: 26px;
-    }
-
-    .bottom-nav {
-        width: 440px;
-    }
-}
-
-/* SCROLLBAR */
-
-::-webkit-scrollbar {
-    width: 6px;
-    height: 5px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 10px;
-}
-
-/* ACCESSIBILITY */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
     }
 }
