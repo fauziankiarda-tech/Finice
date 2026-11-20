@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111111">
+    <meta name="description" content="FINICE - Smart Finance">
+    <title>FINICE - Smart Finance</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Perbaikan: style.css hanya punya kelas .muted, sedangkan HTML memakai .eyebrow -->
+    <style>
+        .eyebrow {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 1.7px;
+            font-weight: 700;
+            margin-bottom: 9px;
+        }
+        .quick-action p:not(.eyebrow) {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        .summary-icon { background: #e5e5e5; color: #111; }
+        .summary-icon.expense-icon { background: #333; color: #fff; }
+        .profile-form input[readonly] { opacity: .6; }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div>
+                <h2>Finice<span>.</span></h2>
+                <small>SMART FINANCE</small>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <button class="icon-button" id="themeToggle">☾</button>
+            <button class="profile-button" id="headerProfile">F</button>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- HOME -->
+        <section class="app-page active" id="homePage">
+
+            <section class="welcome">
+                <p class="eyebrow">WELCOME BACK</p>
+                <h1>Manage your money<span>.</span></h1>
+                <p class="subtitle">Pantau keuanganmu dengan lebih mudah.</p>
+                <div class="date-label" id="currentDate"></div>
+            </section>
+
+            <section class="balance-card">
+                <div class="balance-top">
+                    <div>
+                        <p>Total Balance</p>
+                        <span class="balance-caption">Your available balance</span>
+                    </div>
+                    <div class="wallet-icon">▣</div>
+                </div>
+
+                <h2 id="totalBalance">Rp 0</h2>
+
+                <div class="balance-bottom">
+                    <div>
+                        <span>FINICE ACCOUNT</span>
+                        <strong>•••• 2048</strong>
+                    </div>
+                    <div class="card-symbol">◉◉</div>
+                </div>
+            </section>
+
+            <section class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-heading">
+                        <span class="summary-icon">↙</span>
+                        <span>Income</span>
+                    </div>
+                    <h3 id="totalIncome">Rp 0</h3>
+                    <p>Total pemasukan</p>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-heading">
+                        <span class="summary-icon expense-icon">↗</span>
+                        <span>Expense</span>
+                    </div>
+                    <h3 id="totalExpense">Rp 0</h3>
+                    <p>Total pengeluaran</p>
+                </div>
+            </section>
+
+            <section class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">FINANCIAL OVERVIEW</p>
+                        <h2>Money Flow</h2>
+                    </div>
+                    <span class="period-label">7 Days</span>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </section>
+
+            <section class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">YOUR ACTIVITY</p>
+                        <h2>Recent Transactions</h2>
+                    </div>
+                    <button class="text-button" data-go="activity">View all →</button>
+                </div>
+
+                <div id="transactionList" class="transaction-list"></div>
+            </section>
+
+            <section class="quick-action">
+                <p class="eyebrow">STAY IN CONTROL</p>
+                <h2>Keep your finances organized.</h2>
+                <p>Catat setiap pemasukan dan pengeluaranmu.</p>
+                <button id="addTransaction" class="primary-button">
+                    + Add Transaction
+                </button>
+            </section>
+
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="app-page" id="activityPage">
+
+            <div class="page-header">
+                <p class="eyebrow">TRANSACTION HISTORY</p>
+                <h1>Activity<span>.</span></h1>
+                <p class="subtitle">Pantau semua aktivitas keuanganmu.</p>
+            </div>
+
+            <div class="activity-summary">
+                <div>
+                    <span>Total Transactions</span>
+                    <h2 id="transactionCount">0</h2>
+                </div>
+                <div>
+                    <span>Net Balance</span>
+                    <h2 id="activityBalance">Rp 0</h2>
+                </div>
+            </div>
+
+            <section class="section-card activity-card">
+
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input type="search" id="searchTransaction"
+                    placeholder="Cari transaksi atau kategori...">
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="income">Income</button>
+                    <button class="filter-btn" data-filter="expense">Expense</button>
+                </div>
+
+                <div class="section-heading activity-heading">
+                    <h2>All Transactions</h2>
+                    <span id="activityResult">0 items</span>
+                </div>
+
+                <div id="allTransactions" class="transaction-list"></div>
+            </section>
+
+            <button class="primary-button full-button" id="activityAdd">
+                + Add New Transaction
+            </button>
+
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="app-page" id="statisticsPage">
+
+            <div class="page-header">
+                <p class="eyebrow">FINANCIAL ANALYTICS</p>
+                <h1>Statistics<span>.</span></h1>
+                <p class="subtitle">Kenali pola keuanganmu.</p>
+            </div>
+
+            <section class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">YOUR FINANCIAL BALANCE</p>
+                        <h2>Income vs Expense</h2>
+                    </div>
+                </div>
+
+                <div class="stat-total">
+                    <span>Net Balance</span>
+                    <h2 id="statBalance">Rp 0</h2>
+                </div>
+
+                <div class="stat-comparison">
+                    <div>
+                        <span class="dot income-dot"></span>
+                        <small>Income</small>
+                        <strong id="statIncome">Rp 0</strong>
+                    </div>
+                    <div>
+                        <span class="dot expense-dot"></span>
+                        <small>Expense</small>
+                        <strong id="statExpense">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="statisticsChart"></canvas>
+                </div>
+            </section>
+
+            <section class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">SPENDING ANALYSIS</p>
+                        <h2>Expense Categories</h2>
+                    </div>
+                </div>
+
+                <div class="donut-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+                <div id="categoryBreakdown" class="category-breakdown"></div>
+            </section>
+
+            <section class="section-card">
+                <p class="eyebrow">FINANCIAL INSIGHT</p>
+                <h2>Overview</h2>
+                <div id="financialInsight" class="insight-box">
+                    Belum ada data transaksi.
+                </div>
+            </section>
+
+        </section>
+
+        <!-- PROFILE -->
+        <section class="app-page" id="profilePage">
+
+            <div class="page-header">
+                <p class="eyebrow">PERSONAL SPACE</p>
+                <h1>My Profile<span>.</span></h1>
+                <p class="subtitle">Kelola informasi dan pengaturanmu.</p>
+            </div>
+
+            <div class="profile-card">
+                <div class="profile-avatar" id="profileAvatar">F</div>
+                <h2 id="profileName">Finice User</h2>
+                <p id="profileEmail">Pengguna FINICE</p>
+                <span class="profile-tag">PERSONAL ACCOUNT</span>
+            </div>
+
+            <section class="section-card">
+                <p class="eyebrow">PERSONAL INFORMATION</p>
+                <h2>Account Details</h2>
+
+                <form id="profileForm" class="profile-form">
+                    <label for="userName">Full Name</label>
+                    <input type="text" id="userName"
+                    placeholder="Masukkan nama" maxlength="40">
+
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail"
+                    placeholder="Email akun" readonly>
+
+                    <button type="submit" class="primary-button full-button">
+                        Save Profile
+                    </button>
+                </form>
+            </section>
+
+            <section class="section-card">
+                <p class="eyebrow">PREFERENCES</p>
+                <h2>Settings</h2>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Dark Mode</strong>
+                        <p>Ubah tampilan aplikasi.</p>
+                    </div>
+                    <button class="theme-switch" id="profileTheme">OFF</button>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Currency</strong>
+                        <p>Indonesian Rupiah (IDR)</p>
+                    </div>
+                    <span>Rp</span>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Application</strong>
+                        <p>FINICE Smart Finance</p>
+                    </div>
+                    <span>v2.1</span>
+                </div>
+            </section>
+
+            <section class="section-card">
+                <p class="eyebrow">DATA MANAGEMENT</p>
+                <h2>Cloud Data</h2>
+                <p class="data-warning">
+                    Data tersimpan di database online (Supabase) dan
+                    tersinkron di semua perangkat.
+                </p>
+                <button id="exportData" class="secondary-button full-button">
+                    Export Transactions (JSON)
+                </button>
+                <!-- Tombol Log Out ditambahkan otomatis oleh script.js -->
+            </section>
+
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+
+        <button class="nav-item active" data-page="home">
+            <span>⌂</span>
+            <small>Home</small>
+        </button>
+
+        <button class="nav-item" data-page="activity">
+            <span>⇄</span>
+            <small>Activity</small>
+        </button>
+
+        <button class="nav-item add-nav" id="navAdd">
+            <span>+</span>
+        </button>
+
+        <button class="nav-item" data-page="statistics">
+            <span>▥</span>
+            <small>Statistics</small>
+        </button>
+
+        <button class="nav-item" data-page="profile">
+            <span>◎</span>
+            <small>Profile</small>
+        </button>
+
+    </nav>
+
+</div>
+
+<!-- TRANSACTION MODAL -->
+<div class="modal-overlay" id="transactionModal">
+
+    <div class="modal">
+
+        <div class="modal-heading">
+            <div>
+                <p class="eyebrow">NEW ACTIVITY</p>
+                <h2 id="modalTitle">Add Transaction</h2>
+            </div>
+            <button class="close-button" id="closeModal">×</button>
+        </div>
+
+        <form id="transactionForm">
+
+            <input type="hidden" id="editId">
+
+            <label for="type">Transaction Type</label>
+            <select id="type" required>
+                <option value="income">Income / Pemasukan</option>
+                <option value="expense">Expense / Pengeluaran</option>
+            </select>
+
+            <label for="amount">Amount (Rp)</label>
+            <input type="number" id="amount"
+            placeholder="Contoh: 50000" min="1" step="1" required>
+
+            <label for="category">Category</label>
+            <select id="category" required>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Education">Education</option>
+                <option value="Salary">Salary</option>
+                <option value="Allowance">Allowance</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="description">Description</label>
+            <input type="text" id="description"
+            placeholder="Contoh: Makan siang" maxlength="80">
+
+            <label for="date">Date</label>
+            <input type="date" id="date" required>
+
+            <button type="submit" class="primary-button submit-button">
+                Save Transaction
+            </button>
+
+        </form>
+    </div>
+
+</div>
+
+<!-- URUTAN PENTING: supabase-js -> config.js -> script.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+
+</body>
+  </html>
+                  
