@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111111">
+    <title>Masuk - FINICE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#f3f3f3; --surface:#fff; --text:#151515; --muted:#888; --border:#e8e8e8; --shadow:0 12px 30px rgba(0,0,0,.06); }
+        body.dark { --bg:#101010; --surface:#1b1b1b; --text:#f5f5f5; --muted:#999; --border:#303030; --shadow:0 12px 35px rgba(0,0,0,.3); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); }
+        button, input { font-family:inherit; }
+        button { cursor:pointer; }
+        .auth-wrap { min-height:100vh; display:grid; place-items:center; padding:20px; }
+        .auth-box { width:100%; max-width:400px; padding:28px; background:var(--surface); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow); }
+        .brand { display:flex; align-items:center; gap:12px; margin-bottom:26px; }
+        .brand-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; color:#fff; font-size:24px; font-weight:800; background:linear-gradient(145deg,#555,#080808); }
+        .brand h2 { font-size:23px; letter-spacing:-1px; }
+        .brand h2 span { color:#888; }
+        .brand small { font-size:8px; letter-spacing:2px; color:var(--muted); }
+        h1 { font-size:24px; letter-spacing:-1px; }
+        .subtitle { color:var(--muted); margin-top:6px; font-size:13px; }
+        .auth-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:20px 0 14px; }
+        .tab-btn { padding:11px; border:1px solid var(--border); background:var(--surface); color:var(--muted); border-radius:10px; font-size:12px; font-weight:700; }
+        .tab-btn.active { background:#111; color:#fff; border-color:#111; }
+        .auth-form { display:flex; flex-direction:column; gap:10px; }
+        .auth-form label { font-size:11px; font-weight:700; margin-top:6px; }
+        .auth-form input { width:100%; padding:14px; border-radius:11px; border:1px solid var(--border); background:var(--bg); color:var(--text); outline:none; font-size:13px; }
+        #nameRow { display:none; flex-direction:column; gap:10px; }
+        .primary-button { width:100%; margin-top:16px; border:none; padding:14px 20px; background:#111; color:#fff; border-radius:12px; font-size:13px; font-weight:700; }
+        .primary-button:disabled { opacity:.6; }
+        .link-btn { border:none; background:none; color:var(--muted); font-size:11px; margin-top:10px; text-decoration:underline; }
+        .auth-msg { min-height:18px; font-size:12px; margin-top:6px; color:#c44; line-height:1.5; }
+        .auth-msg.ok { color:#2a7; }
+    </style>
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-box">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div><h2>Finice<span>.</span></h2><small>SMART FINANCE</small></div>
+        </div>
+
+        <h1 id="authTitle">Masuk</h1>
+        <p class="subtitle">Kelola keuanganmu dari mana saja.</p>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="tabLogin" type="button">Masuk</button>
+            <button class="tab-btn" id="tabRegister" type="button">Daftar</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+            <div id="nameRow">
+                <label for="authName">Nama</label>
+                <input type="text" id="authName" maxlength="40" placeholder="Nama lengkap">
+            </div>
+
+            <label for="authEmail">Email</label>
+            <input type="email" id="authEmail" required autocomplete="email" placeholder="nama@email.com">
+
+            <label for="authPassword">Password</label>
+            <input type="password" id="authPassword" required minlength="6" autocomplete="current-password" placeholder="Minimal 6 karakter">
+
+            <button type="submit" class="primary-button" id="authSubmit">Masuk</button>
+            <button type="button" class="link-btn" id="forgotBtn">Lupa password?</button>
+            <div class="auth-msg" id="authMsg" role="alert"></div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let mode = "login";
+
+try {
+    if (localStorage.getItem("finice_theme") === "dark") document.body.classList.add("dark");
+} catch {}
+
+db.auth.getSession().then(({ data }) => {
+    if (data.session) location.replace("index.html");
+});
+
+function setMode(m) {
+    mode = m;
+    const reg = m === "register";
+    $("tabLogin").classList.toggle("active", !reg);
+    $("tabRegister").classList.toggle("active", reg);
+    $("nameRow").style.display = reg ? "flex" : "none";
+    $("authTitle").textContent = reg ? "Buat Akun" : "Masuk";
+    $("authSubmit").textContent = reg ? "Daftar" : "Masuk";
+    $("authPassword").autocomplete = reg ? "new-password" : "current-password";
+    showMsg("");
+}
+
+function showMsg(text, ok = false) {
+    $("authMsg").textContent = text;
+    $("authMsg").classList.toggle("ok", ok);
+}
+
+function friendly(error) {
+    const m = (error.message || "").toLowerCase();
+    if (m.includes("invalid login")) return "Email atau password salah.";
+    if (m.includes("already registered")) return "Email sudah terdaftar. Silakan masuk.";
+    if (m.includes("email not confirmed")) return "Email belum dikonfirmasi. Cek inbox kamu.";
+    if (m.includes("rate limit")) return "Terlalu banyak percobaan. Coba lagi nanti.";
+    return error.message;
+}
+
+$("tabLogin").addEventListener("click", () => setMode("login"));
+$("tabRegister").addEventListener("click", () => setMode("register"));
+
+$("authForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+    $("authSubmit").disabled = true;
+    showMsg("");
+
+    try {
+        if (mode === "login") {
+            const { error } = await db.auth.signInWithPassword({ email, password });
+            if (error) return showMsg(friendly(error));
+            location.replace("index.html");
+        } else {
+            const name = $("authName").value.trim();
+            const { data, error } = await db.auth.signUp({
+                email, password,
+                options: { data: { full_name: name } }
+            });
+            if (error) return showMsg(friendly(error));
+            if (data.session) location.replace("index.html");
+            else showMsg("Pendaftaran berhasil. Cek email untuk konfirmasi, lalu masuk.", true);
+        }
+    } finally {
+        $("authSubmit").disabled = false;
+    }
+});
+
+$("forgotBtn").addEventListener("click", async () => {
+    const email = $("authEmail").value.trim();
+    if (!email) return showMsg("Isi email dulu, lalu tekan Lupa password.");
+    const { error } = await db.auth.resetPasswordForEmail(email);
+    if (error) showMsg(friendly(error));
+    else showMsg("Tautan reset password telah dikirim ke email kamu.", true);
+});
+</script>
+</body>
+</html>
