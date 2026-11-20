@@ -40,9 +40,7 @@ body.dark-mode {
     --shadow: 0 8px 28px rgba(0,0,0,.2);
 }
 
-button,
-input,
-select {
+button, input, select {
     font: inherit;
 }
 
@@ -431,8 +429,7 @@ main {
     overflow-wrap: anywhere;
 }
 
-.transaction-right,
-.wallet-right {
+.transaction-right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -446,26 +443,12 @@ main {
     white-space: nowrap;
 }
 
-.wallet-balance {
-    font-size: 12px;
-    font-weight: 800;
-    white-space: nowrap;
+.income-text {
+    color: #26834b;
 }
 
-.wallet-balance.minus {
+.expense-text {
     color: #c44;
-}
-
-.wallet-icon-sm {
-    width: 43px;
-    height: 43px;
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
-    background: var(--surface-2);
-    font-size: 15px;
-    font-weight: 800;
 }
 
 .transaction-actions {
@@ -527,7 +510,8 @@ main {
 }
 
 .primary-button,
-.secondary-button {
+.secondary-button,
+.danger-button {
     min-height: 46px;
     padding: 13px 18px;
     border: none;
@@ -540,7 +524,8 @@ main {
 }
 
 .primary-button:active,
-.secondary-button:active {
+.secondary-button:active,
+.danger-button:active {
     transform: scale(.98);
 }
 
@@ -548,6 +533,11 @@ main {
     background: var(--surface-2);
     color: var(--text);
     border: 1px solid var(--border);
+}
+
+.danger-button {
+    background: #a52b2b;
+    color: white;
 }
 
 .full-button {
@@ -977,21 +967,10 @@ main {
     display: none !important;
 }
 
-.field-hint {
-    font-size: 10px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-top: 2px;
-}
-
 @media (min-width: 760px) {
     .app-container {
         padding-left: 40px;
         padding-right: 40px;
-    }
-
-    #homePage {
-        display: none;
     }
 
     #homePage.active {
@@ -1040,8 +1019,7 @@ main {
         padding: 15px;
     }
 
-    .transaction-right,
-    .wallet-right {
+    .transaction-right {
         flex-direction: column;
         align-items: flex-end;
         gap: 7px;
@@ -1049,10 +1027,6 @@ main {
 
     .transaction-actions button {
         padding: 5px 6px;
-    }
-
-    .wallet-balance {
-        font-size: 10px;
     }
 
     .transaction-amount {
