@@ -1,3 +1,4 @@
+
 // FINICE - SMART FINANCE
 
 const $ = id => document.getElementById(id);
@@ -183,22 +184,32 @@ $("headerProfile").addEventListener("click", () => {
 });
 
 // ==============================
-// TEMA GELAP
+// TEMA TERANG DAN GELAP
 // ==============================
 
+function isDarkTheme() {
+    return localStorage.getItem(THEME_KEY) === "dark";
+}
+
 function applyTheme() {
-    const dark = localStorage.getItem(THEME_KEY) === "dark";
+    const dark = isDarkTheme();
 
+    // Sinkronisasi class tema
     document.body.classList.toggle("dark-mode", dark);
+    document.body.classList.toggle("dark", dark);
 
+    // Tombol header
     $("themeToggle").textContent = dark ? "☀" : "☾";
+
+    // Tombol profil
     $("profileTheme").textContent = dark ? "AKTIF" : "MATI";
 
+    // Perbarui warna grafik
     updateCharts();
 }
 
 function toggleTheme() {
-    const dark = document.body.classList.contains("dark-mode");
+    const dark = isDarkTheme();
 
     localStorage.setItem(
         THEME_KEY,
@@ -208,7 +219,10 @@ function toggleTheme() {
     applyTheme();
 }
 
+// Tombol tema header
 $("themeToggle").addEventListener("click", toggleTheme);
+
+// Tombol tema profil
 $("profileTheme").addEventListener("click", toggleTheme);
 
 // ==============================
@@ -219,6 +233,7 @@ function loadProfile() {
     if (!currentUser) return;
 
     const email = currentUser.email || "";
+
     const name =
         currentUser.user_metadata?.full_name ||
         currentUser.user_metadata?.name ||
@@ -234,6 +249,9 @@ function loadProfile() {
 
     $("userName").value = name;
     $("userEmail").value = email;
+
+    // Pastikan status tombol profil selalu sesuai tema
+    $("profileTheme").textContent = isDarkTheme() ? "AKTIF" : "MATI";
 }
 
 $("profileForm").addEventListener("submit", async event => {
@@ -247,6 +265,7 @@ $("profileForm").addEventListener("submit", async event => {
     }
 
     const button = event.target.querySelector("button");
+
     button.disabled = true;
     button.textContent = "Menyimpan...";
 
@@ -350,9 +369,7 @@ function openModal(id = null) {
 
         buildCategoryOptions(item.type, item.category);
 
-        if (
-            $("category").value === CUSTOM_VALUE
-        ) {
+        if ($("category").value === CUSTOM_VALUE) {
             $("customCategory").value = item.category;
         }
 
@@ -697,9 +714,11 @@ document.querySelectorAll(".filter-btn").forEach(button => {
 // ==============================
 
 function chartTextColor() {
-    return document.body.classList.contains("dark-mode")
-        ? "#eeeeee"
-        : "#555555";
+    const dark =
+        document.body.classList.contains("dark-mode") ||
+        document.body.classList.contains("dark");
+
+    return dark ? "#eeeeee" : "#555555";
 }
 
 function updateFinanceChart() {
@@ -721,7 +740,10 @@ function updateFinanceChart() {
             String(date.getDate()).padStart(2, "0");
 
         labels.push(
-            date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })
+            date.toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short"
+            })
         );
 
         const daily = transactions.filter(item => item.date === dateString);
@@ -777,8 +799,12 @@ function updateFinanceChart() {
             },
             scales: {
                 x: {
-                    ticks: { color: chartTextColor() },
-                    grid: { display: false }
+                    ticks: {
+                        color: chartTextColor()
+                    },
+                    grid: {
+                        display: false
+                    }
                 },
                 y: {
                     beginAtZero: true,
@@ -821,12 +847,18 @@ function updateStatisticsChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
             },
             scales: {
                 x: {
-                    ticks: { color: chartTextColor() },
-                    grid: { display: false }
+                    ticks: {
+                        color: chartTextColor()
+                    },
+                    grid: {
+                        display: false
+                    }
                 },
                 y: {
                     beginAtZero: true,
@@ -866,8 +898,11 @@ function updateCategoryChart() {
 
     if (categoryChart) categoryChart.destroy();
 
+    const breakdown = $("categoryBreakdown");
+    breakdown.replaceChildren();
+
     if (labels.length === 0) {
-        $("categoryBreakdown").textContent = "Belum ada data pengeluaran.";
+        breakdown.textContent = "Belum ada data pengeluaran.";
         categoryChart = null;
         return;
     }
@@ -889,9 +924,11 @@ function updateCategoryChart() {
                     "#dddddd"
                 ],
                 borderWidth: 2,
-                borderColor: document.body.classList.contains("dark-mode")
-                    ? "#1b1b1b"
-                    : "#ffffff"
+                borderColor:
+                    document.body.classList.contains("dark-mode") ||
+                    document.body.classList.contains("dark")
+                        ? "#1b1b1b"
+                        : "#ffffff"
             }]
         },
         options: {
@@ -910,9 +947,6 @@ function updateCategoryChart() {
         }
     });
 
-    const breakdown = $("categoryBreakdown");
-    breakdown.replaceChildren();
-
     labels.forEach((name, index) => {
         const row = document.createElement("div");
         row.className = "category-row";
@@ -929,8 +963,6 @@ function updateCategoryChart() {
 }
 
 function updateCharts() {
-    if (!transactions) return;
-
     if (financeChart) updateFinanceChart();
     if (statisticsChart) updateStatisticsChart();
     if (categoryChart) updateCategoryChart();
@@ -953,18 +985,22 @@ function updateStatistics() {
     const insight = $("financialInsight");
 
     if (transactions.length === 0) {
-        insight.textContent = "Belum ada data transaksi. Tambahkan transaksi untuk melihat ringkasan keuangan.";
+        insight.textContent =
+            "Belum ada data transaksi. Tambahkan transaksi untuk melihat ringkasan keuangan.";
         return;
     }
 
     let message = "";
 
     if (totals.income > totals.expense) {
-        message = "Pemasukanmu lebih besar daripada pengeluaran. Pertahankan pengelolaan keuangan yang baik.";
+        message =
+            "Pemasukanmu lebih besar daripada pengeluaran. Pertahankan pengelolaan keuangan yang baik.";
     } else if (totals.income < totals.expense) {
-        message = "Pengeluaranmu lebih besar daripada pemasukan. Periksa kembali pengeluaran agar keuangan lebih teratur.";
+        message =
+            "Pengeluaranmu lebih besar daripada pemasukan. Periksa kembali pengeluaran agar keuangan lebih teratur.";
     } else {
-        message = "Jumlah pemasukan dan pengeluaranmu saat ini seimbang.";
+        message =
+            "Jumlah pemasukan dan pengeluaranmu saat ini seimbang.";
     }
 
     insight.textContent =
@@ -990,7 +1026,9 @@ function exportData() {
 
     const file = new Blob(
         [JSON.stringify(data, null, 2)],
-        { type: "application/json" }
+        {
+            type: "application/json"
+        }
     );
 
     const url = URL.createObjectURL(file);
@@ -1028,6 +1066,7 @@ async function initApp() {
             return;
         }
 
+        // Terapkan tema sebelum memuat data
         applyTheme();
 
         const loggedIn = await checkLogin();
