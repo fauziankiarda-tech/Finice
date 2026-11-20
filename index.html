@@ -7,7 +7,36 @@
     <meta name="description" content="FINICE - Aplikasi pengelolaan keuangan">
     <title>FINICE - Smart Finance</title>
 
-    <link rel="stylesheet" href="style.css">
+    <script>
+        // Menampilkan error JavaScript langsung di layar (untuk diagnosa di HP)
+        function finiceShowError(text) {
+            var box = document.getElementById("errorBanner");
+            if (!box) {
+                box = document.createElement("div");
+                box.id = "errorBanner";
+                box.style.cssText =
+                    "position:fixed;top:0;left:0;right:0;z-index:99999;" +
+                    "background:#dc4545;color:#fff;padding:10px 14px;" +
+                    "font:12px/1.5 sans-serif;white-space:pre-wrap;" +
+                    "word-break:break-word;max-height:40vh;overflow:auto";
+                document.documentElement.appendChild(box);
+            }
+            box.textContent += text + "\n";
+        }
+        window.addEventListener("error", function (e) {
+            finiceShowError(
+                "ERROR: " + e.message +
+                "\n(" + (e.filename || "").split("/").pop() + ":" + e.lineno + ")"
+            );
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+            finiceShowError(
+                "ERROR: " + (e.reason && e.reason.message ? e.reason.message : e.reason)
+            );
+        });
+    </script>
+
+    <link rel="stylesheet" href="style.css?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -427,8 +456,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="script.js"></script>
+<script src="config.js?v=5"></script>
+<script src="script.js?v=5"></script>
 </body>
     </html>
-                    
+    
