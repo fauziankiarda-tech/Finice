@@ -8,7 +8,10 @@ const CUSTOM_VALUE = "__custom";
 
 const DEFAULT_CATEGORIES = {
     income: ["Gaji", "Uang Saku", "Bonus", "Bisnis", "Lainnya"],
-    expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Pendidikan", "Kesehatan", "Hiburan", "Lainnya"]
+    expense: [
+        "Makanan", "Transportasi", "Belanja", "Tagihan",
+        "Pendidikan", "Kesehatan", "Hiburan", "Lainnya"
+    ]
 };
 
 let transactions = [];
@@ -96,13 +99,16 @@ async function logout() {
 // ==============================
 
 async function loadTransactions() {
+    if (!currentUser) return;
+
     const { data, error } = await db
         .from("transactions")
         .select("id, user_id, type, amount, category, description, date")
+        .eq("user_id", currentUser.id)
         .order("date", { ascending: false });
 
     if (error) {
-        console.error(error);
+        console.error("Gagal memuat transaksi:", error);
         showError("Gagal memuat transaksi: " + error.message);
         transactions = [];
         return;
@@ -276,6 +282,7 @@ $("profileForm").addEventListener("submit", async event => {
     } catch (error) {
         console.error(error);
         showError("Gagal menyimpan profil: " + error.message);
+
     } finally {
         button.disabled = false;
         button.textContent = "Simpan Profil";
@@ -367,6 +374,7 @@ function openModal(id = null) {
         $("date").value = item.date;
 
         $("modalTitle").textContent = "Edit Transaksi";
+
     } else {
         $("type").value = "income";
         buildCategoryOptions("income");
@@ -450,10 +458,12 @@ $("transactionForm").addEventListener("submit", async event => {
     button.textContent = "Menyimpan...";
 
     try {
-        let result;
+        let error;
 
         if (idValue) {
-            result = await db
+            // EDIT TRANSAKSI
+
+            const result = await db
                 .from("transactions")
                 .update({
                     type,
@@ -463,23 +473,22 @@ $("transactionForm").addEventListener("submit", async event => {
                     date
                 })
                 .eq("id", idValue)
-                .eq("user_id", currentUser.id)
-                .select()
-                .single();
+                .eq("user_id", currentUser.id);
+
+            error = result.error;
+
         } else {
-            result = await db
+            // TAMBAH TRANSAKSI
+
+            const result = await db
                 .from("transactions")
-                .insert(payload)
-                .select()
-                .single();
+                .insert([payload]);
+
+            error = result.error;
         }
 
-        if (result.error) {
-            throw result.error;
-        }
-
-        if (!result.data) {
-            throw new Error("Data transaksi tidak dikembalikan oleh Supabase.");
+        if (error) {
+            throw error;
         }
 
         await loadTransactions();
@@ -511,6 +520,11 @@ $("transactionForm").addEventListener("submit", async event => {
 // ==============================
 
 async function deleteTransaction(id) {
+    if (!currentUser) {
+        showError("Silakan login kembali.");
+        return;
+    }
+
     const confirmed = confirm("Yakin ingin menghapus transaksi ini?");
 
     if (!confirmed) return;
@@ -522,12 +536,15 @@ async function deleteTransaction(id) {
         .eq("user_id", currentUser.id);
 
     if (error) {
+        console.error(error);
         showError("Gagal menghapus transaksi: " + error.message);
         return;
     }
 
     await loadTransactions();
     refreshAll();
+
+    alert("Transaksi berhasil dihapus.");
 }
 
 // ==============================
@@ -859,14 +876,16 @@ function updateCategoryChart() {
     const labels = Object.keys(grouped);
     const values = Object.values(grouped);
 
-    if (categoryChart) categoryChart.destroy();
+    if (categoryChart) {
+        categoryChart.destroy();
+        categoryChart = null;
+    }
 
     const breakdown = $("categoryBreakdown");
     breakdown.replaceChildren();
 
     if (labels.length === 0) {
         breakdown.textContent = "Belum ada data pengeluaran.";
-        categoryChart = null;
         return;
     }
 
@@ -1030,7 +1049,11 @@ async function initApp() {
 
     } catch (error) {
         console.error("FINICE error:", error);
-        showError("Terjadi kesalahan saat menjalankan FINICE.");
+
+        showError(
+            "Terjadi kesalahan saat menjalankan FINICE: " +
+            (error.message || "Kesalahan tidak diketahui")
+        );
     }
 }
 
