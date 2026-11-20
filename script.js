@@ -27,11 +27,12 @@ const rupiah = value => new Intl.NumberFormat("id-ID", {
 
 function localDate() {
     const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
+    return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+    ].join("-");
 }
 
 function showError(message) {
@@ -97,7 +98,7 @@ async function logout() {
 async function loadTransactions() {
     const { data, error } = await db
         .from("transactions")
-        .select("id, type, amount, category, description, date")
+        .select("id, user_id, type, amount, category, description, date")
         .order("date", { ascending: false });
 
     if (error) {
@@ -184,7 +185,7 @@ $("headerProfile").addEventListener("click", () => {
 });
 
 // ==============================
-// TEMA TERANG DAN GELAP
+// TEMA
 // ==============================
 
 function isDarkTheme() {
@@ -194,35 +195,25 @@ function isDarkTheme() {
 function applyTheme() {
     const dark = isDarkTheme();
 
-    // Sinkronisasi class tema
     document.body.classList.toggle("dark-mode", dark);
     document.body.classList.toggle("dark", dark);
 
-    // Tombol header
     $("themeToggle").textContent = dark ? "☀" : "☾";
-
-    // Tombol profil
     $("profileTheme").textContent = dark ? "AKTIF" : "MATI";
 
-    // Perbarui warna grafik
     updateCharts();
 }
 
 function toggleTheme() {
-    const dark = isDarkTheme();
-
     localStorage.setItem(
         THEME_KEY,
-        dark ? "light" : "dark"
+        isDarkTheme() ? "light" : "dark"
     );
 
     applyTheme();
 }
 
-// Tombol tema header
 $("themeToggle").addEventListener("click", toggleTheme);
-
-// Tombol tema profil
 $("profileTheme").addEventListener("click", toggleTheme);
 
 // ==============================
@@ -250,7 +241,6 @@ function loadProfile() {
     $("userName").value = name;
     $("userEmail").value = email;
 
-    // Pastikan status tombol profil selalu sesuai tema
     $("profileTheme").textContent = isDarkTheme() ? "AKTIF" : "MATI";
 }
 
@@ -269,24 +259,27 @@ $("profileForm").addEventListener("submit", async event => {
     button.disabled = true;
     button.textContent = "Menyimpan...";
 
-    const { data, error } = await db.auth.updateUser({
-        data: {
-            full_name: name
-        }
-    });
+    try {
+        const { data, error } = await db.auth.updateUser({
+            data: {
+                full_name: name
+            }
+        });
 
-    button.disabled = false;
-    button.textContent = "Simpan Profil";
+        if (error) throw error;
 
-    if (error) {
+        currentUser = data.user;
+        loadProfile();
+
+        alert("Profil berhasil diperbarui.");
+
+    } catch (error) {
+        console.error(error);
         showError("Gagal menyimpan profil: " + error.message);
-        return;
+    } finally {
+        button.disabled = false;
+        button.textContent = "Simpan Profil";
     }
-
-    currentUser = data.user;
-    loadProfile();
-
-    alert("Profil berhasil diperbarui.");
 });
 
 // ==============================
@@ -369,10 +362,6 @@ function openModal(id = null) {
 
         buildCategoryOptions(item.type, item.category);
 
-        if ($("category").value === CUSTOM_VALUE) {
-            $("customCategory").value = item.category;
-        }
-
         $("amount").value = item.amount;
         $("description").value = item.description || "";
         $("date").value = item.date;
@@ -409,6 +398,11 @@ $("transactionModal").addEventListener("click", event => {
 $("transactionForm").addEventListener("submit", async event => {
     event.preventDefault();
 
+    if (!currentUser) {
+        showError("Sesi akun tidak ditemukan. Silakan login kembali.");
+        return;
+    }
+
     const idValue = $("editId").value;
     const type = $("type").value;
     const amount = Number($("amount").value);
@@ -442,6 +436,7 @@ $("transactionForm").addEventListener("submit", async event => {
     }
 
     const payload = {
+        user_id: currentUser.id,
         type,
         amount,
         category,
@@ -449,7 +444,7 @@ $("transactionForm").addEventListener("submit", async event => {
         date
     };
 
-    const button = event.target.querySelector(".submit-button");
+    const button = $("transactionForm").querySelector(".submit-button");
 
     button.disabled = true;
     button.textContent = "Menyimpan...";
@@ -460,8 +455,15 @@ $("transactionForm").addEventListener("submit", async event => {
         if (idValue) {
             result = await db
                 .from("transactions")
-                .update(payload)
+                .update({
+                    type,
+                    amount,
+                    category,
+                    description,
+                    date
+                })
                 .eq("id", idValue)
+                .eq("user_id", currentUser.id)
                 .select()
                 .single();
         } else {
@@ -473,34 +475,31 @@ $("transactionForm").addEventListener("submit", async event => {
         }
 
         if (result.error) {
-            showError("Gagal menyimpan transaksi: " + result.error.message);
-            return;
+            throw result.error;
         }
 
-        const saved = {
-            ...result.data,
-            amount: Number(result.data.amount),
-            description: result.data.description || ""
-        };
-
-        if (idValue) {
-            const index = transactions.findIndex(
-                item => String(item.id) === String(idValue)
-            );
-
-            if (index !== -1) {
-                transactions[index] = saved;
-            }
-        } else {
-            transactions.push(saved);
+        if (!result.data) {
+            throw new Error("Data transaksi tidak dikembalikan oleh Supabase.");
         }
+
+        await loadTransactions();
 
         refreshAll();
         closeModal();
 
+        alert(idValue
+            ? "Transaksi berhasil diperbarui."
+            : "Transaksi berhasil ditambahkan."
+        );
+
     } catch (error) {
-        console.error(error);
-        showError("Terjadi kesalahan saat menyimpan transaksi.");
+        console.error("Gagal menyimpan transaksi:", error);
+
+        showError(
+            "Gagal menyimpan transaksi.\n\n" +
+            "Pesan: " + (error.message || "Kesalahan tidak diketahui")
+        );
+
     } finally {
         button.disabled = false;
         button.textContent = "Simpan Transaksi";
@@ -519,17 +518,15 @@ async function deleteTransaction(id) {
     const { error } = await db
         .from("transactions")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", currentUser.id);
 
     if (error) {
         showError("Gagal menghapus transaksi: " + error.message);
         return;
     }
 
-    transactions = transactions.filter(
-        item => String(item.id) !== String(id)
-    );
-
+    await loadTransactions();
     refreshAll();
 }
 
@@ -590,18 +587,14 @@ function createTransactionRow(item, showActions = false) {
         edit.textContent = "Edit";
         edit.type = "button";
 
-        edit.addEventListener("click", () => {
-            openModal(item.id);
-        });
+        edit.addEventListener("click", () => openModal(item.id));
 
         const remove = document.createElement("button");
         remove.textContent = "Hapus";
         remove.type = "button";
         remove.className = "delete-btn";
 
-        remove.addEventListener("click", () => {
-            deleteTransaction(item.id);
-        });
+        remove.addEventListener("click", () => deleteTransaction(item.id));
 
         actions.append(edit, remove);
         right.appendChild(actions);
@@ -661,9 +654,7 @@ function renderActivity() {
     $("transactionCount").textContent = transactions.length;
     $("activityBalance").textContent = rupiah(totals.balance);
 
-    const search = $("searchTransaction").value
-        .toLowerCase()
-        .trim();
+    const search = $("searchTransaction").value.toLowerCase().trim();
 
     const filtered = transactions.filter(item => {
         const matchesFilter =
@@ -714,11 +705,9 @@ document.querySelectorAll(".filter-btn").forEach(button => {
 // ==============================
 
 function chartTextColor() {
-    const dark =
-        document.body.classList.contains("dark-mode") ||
-        document.body.classList.contains("dark");
-
-    return dark ? "#eeeeee" : "#555555";
+    return document.body.classList.contains("dark-mode")
+        ? "#eeeeee"
+        : "#555555";
 }
 
 function updateFinanceChart() {
@@ -749,14 +738,12 @@ function updateFinanceChart() {
         const daily = transactions.filter(item => item.date === dateString);
 
         incomeData.push(
-            daily
-                .filter(item => item.type === "income")
+            daily.filter(item => item.type === "income")
                 .reduce((sum, item) => sum + item.amount, 0)
         );
 
         expenseData.push(
-            daily
-                .filter(item => item.type === "expense")
+            daily.filter(item => item.type === "expense")
                 .reduce((sum, item) => sum + item.amount, 0)
         );
     }
@@ -799,24 +786,16 @@ function updateFinanceChart() {
             },
             scales: {
                 x: {
-                    ticks: {
-                        color: chartTextColor()
-                    },
-                    grid: {
-                        display: false
-                    }
+                    ticks: { color: chartTextColor() },
+                    grid: { display: false }
                 },
                 y: {
                     beginAtZero: true,
                     ticks: {
                         color: chartTextColor(),
-                        callback: value => {
-                            return "Rp " + Number(value).toLocaleString("id-ID");
-                        }
+                        callback: value => "Rp " + Number(value).toLocaleString("id-ID")
                     },
-                    grid: {
-                        color: "rgba(130,130,130,.12)"
-                    }
+                    grid: { color: "rgba(130,130,130,.12)" }
                 }
             }
         }
@@ -846,31 +825,19 @@ function updateStatisticsChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
                 x: {
-                    ticks: {
-                        color: chartTextColor()
-                    },
-                    grid: {
-                        display: false
-                    }
+                    ticks: { color: chartTextColor() },
+                    grid: { display: false }
                 },
                 y: {
                     beginAtZero: true,
                     ticks: {
                         color: chartTextColor(),
-                        callback: value => {
-                            return "Rp " + Number(value).toLocaleString("id-ID");
-                        }
+                        callback: value => "Rp " + Number(value).toLocaleString("id-ID")
                     },
-                    grid: {
-                        color: "rgba(130,130,130,.12)"
-                    }
+                    grid: { color: "rgba(130,130,130,.12)" }
                 }
             }
         }
@@ -882,15 +849,11 @@ function updateCategoryChart() {
 
     if (!canvas || typeof Chart === "undefined") return;
 
-    const expenses = transactions.filter(
-        item => item.type === "expense"
-    );
-
+    const expenses = transactions.filter(item => item.type === "expense");
     const grouped = {};
 
     expenses.forEach(item => {
-        grouped[item.category] =
-            (grouped[item.category] || 0) + item.amount;
+        grouped[item.category] = (grouped[item.category] || 0) + item.amount;
     });
 
     const labels = Object.keys(grouped);
@@ -914,21 +877,13 @@ function updateCategoryChart() {
             datasets: [{
                 data: values,
                 backgroundColor: [
-                    "#222222",
-                    "#555555",
-                    "#888888",
-                    "#aaaaaa",
-                    "#cccccc",
-                    "#444444",
-                    "#777777",
-                    "#dddddd"
+                    "#222222", "#555555", "#888888", "#aaaaaa",
+                    "#cccccc", "#444444", "#777777", "#dddddd"
                 ],
                 borderWidth: 2,
-                borderColor:
-                    document.body.classList.contains("dark-mode") ||
-                    document.body.classList.contains("dark")
-                        ? "#1b1b1b"
-                        : "#ffffff"
+                borderColor: document.body.classList.contains("dark-mode")
+                    ? "#1b1b1b"
+                    : "#ffffff"
             }]
         },
         options: {
@@ -993,14 +948,11 @@ function updateStatistics() {
     let message = "";
 
     if (totals.income > totals.expense) {
-        message =
-            "Pemasukanmu lebih besar daripada pengeluaran. Pertahankan pengelolaan keuangan yang baik.";
+        message = "Pemasukanmu lebih besar daripada pengeluaran. Pertahankan pengelolaan keuangan yang baik.";
     } else if (totals.income < totals.expense) {
-        message =
-            "Pengeluaranmu lebih besar daripada pemasukan. Periksa kembali pengeluaran agar keuangan lebih teratur.";
+        message = "Pengeluaranmu lebih besar daripada pemasukan. Periksa kembali pengeluaran agar keuangan lebih teratur.";
     } else {
-        message =
-            "Jumlah pemasukan dan pengeluaranmu saat ini seimbang.";
+        message = "Jumlah pemasukan dan pengeluaranmu saat ini seimbang.";
     }
 
     insight.textContent =
@@ -1026,14 +978,12 @@ function exportData() {
 
     const file = new Blob(
         [JSON.stringify(data, null, 2)],
-        {
-            type: "application/json"
-        }
+        { type: "application/json" }
     );
 
     const url = URL.createObjectURL(file);
-
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "finice-transaksi.json";
     link.click();
@@ -1045,7 +995,7 @@ $("exportData").addEventListener("click", exportData);
 $("logoutButton").addEventListener("click", logout);
 
 // ==============================
-// PERBARUI SEMUA TAMPILAN
+// PERBARUI TAMPILAN
 // ==============================
 
 function refreshAll() {
@@ -1066,7 +1016,6 @@ async function initApp() {
             return;
         }
 
-        // Terapkan tema sebelum memuat data
         applyTheme();
 
         const loggedIn = await checkLogin();
